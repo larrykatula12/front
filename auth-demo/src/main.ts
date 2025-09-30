@@ -1,6 +1,16 @@
 import { bootstrapApplication } from '@angular/platform-browser';
-import { appConfig } from './app/app.config';
-import { App } from './app/app';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
 
-bootstrapApplication(App, appConfig)
-  .catch((err) => console.error(err));
+import { AppComponent } from './app';
+import { routes } from './app.routes.';
+import { AuthInterceptor } from './auth-interceptor';
+
+bootstrapApplication(AppComponent, {
+  providers: [
+    provideRouter(routes),
+    provideHttpClient(withInterceptors([() => new AuthInterceptor()])),
+    importProvidersFrom(FormsModule)
+  ]
+});

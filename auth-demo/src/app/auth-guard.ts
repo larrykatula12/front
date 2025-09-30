@@ -1,5 +1,27 @@
-import { CanActivateFn } from '@angular/router';
+import { Injectable } from '@angular/core';
+import { CanActivate, Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { catchError, map, of } from 'rxjs';
 
-export const authGuard: CanActivateFn = (route, state) => {
-  return true;
-};
+@Injectable({ providedIn: 'root' })
+export class AuthGuard implements CanActivate {
+  private API = 'http://localhost:8000';
+
+  constructor(private http: HttpClient, private router: Router) {}
+
+  canActivate() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      this.router.navigateByUrl('/login');
+      return false;
+    }
+    return this.http.get(`${this.API}/landing`).pipe(
+      map(() => true),
+      catchError(() => {
+        localStorage.removeItem('token');
+        this.router.navigateByUrl('/login');
+        return of(false);
+      })
+    );
+  }
+}
