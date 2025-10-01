@@ -1,12 +1,14 @@
-import { Component, signal } from '@angular/core';
+// src/app/app.ts
+
+import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  standalone: true,
+  imports: [RouterOutlet], // Importamos RouterOutlet para que las rutas funcionen
   templateUrl: './app.html',
-  styleUrl: './app.scss'
 })
-export class App {
-  protected readonly title = signal('auth-demo');
+export class AppComponent {
+  title = 'auth-demo';
 }
