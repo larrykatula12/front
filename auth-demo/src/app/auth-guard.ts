@@ -1,25 +1,22 @@
+// src/app/auth-guard.ts
+
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
-import { catchError, map, of } from 'rxjs';
 
+// La función del guardián de la ruta
 export const authGuard: CanActivateFn = () => {
-  const http = inject(HttpClient);
   const router = inject(Router);
-  const API = 'http://localhost:8000';
 
+  // Verificamos si existe un token en el localStorage
   const token = localStorage.getItem('token');
+
+  // Si no hay token...
   if (!token) {
+    // Redirigimos al usuario a la página de login
     router.navigateByUrl('/login');
-    return false;
+    return false; // No permitimos el acceso
   }
 
-  return http.get(`${API}/landing`).pipe(
-    map(() => true),
-    catchError(() => {
-      localStorage.removeItem('token');
-      router.navigateByUrl('/login');
-      return of(false);
-    })
-  );
+  // Si hay un token, permitimos el acceso a la ruta
+  return true;
 };

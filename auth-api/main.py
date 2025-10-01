@@ -5,22 +5,35 @@ from passlib.context import CryptContext
 from datetime import datetime, timedelta
 from typing import Annotated
 import jwt
+from fastapi.middleware.cors import CORSMiddleware
 
-# Configuración
-# Es una mala práctica tener la clave secreta en el código.
-# Es mejor cargarla desde una variable de entorno.
-# Ejemplo: os.getenv("SECRET_KEY", "una_clave_por_defecto_para_desarrollo")
+# --- Configuración ---
+# Es una buena práctica cargar secretos desde variables de entorno.
 SECRET_KEY = os.getenv("SECRET_KEY", "mi_clave_secreta_super_segura")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-# Inicialización
+# --- Inicialización de la App ---
 app = FastAPI(title="API de Autenticación")
 
+# --- Configuración de CORS ---
+origins = [
+    "http://localhost:4200",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# --- Configuración de Seguridad ---
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# Base de datos simulada
+# --- Base de Datos (Simulada) ---
 fake_users_db = {
     "javier": {
         "username": "javier",
@@ -28,7 +41,7 @@ fake_users_db = {
     }
 }
 
-# Utilidades
+# --- Funciones de Utilidad ---
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
@@ -44,9 +57,10 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     to_encode = data.copy()
     expire = datetime.utcnow() + (expires_delta or timedelta(minutes=15))
     to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
 
-# Dependencia para obtener el usuario actual a partir del token
+# --- Dependencia para Obtener Usuario Actual ---
 async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -64,7 +78,9 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
         raise credentials_exception
     return username
 
-# --- Endpoints ---
+
+# --- Endpoints de la API ---
+
 @app.post("/login", tags=["auth"])
 async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
     user = authenticate_user(form_data.username, form_data.password)
@@ -79,6 +95,7 @@ async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
         data={"sub": user["username"]}, expires_delta=access_token_expires
     )
     return {"access_token": token, "token_type": "bearer"}
+
 
 @app.get("/landing", tags=["protected"])
 async def landing(current_user: Annotated[str, Depends(get_current_user)]):
