@@ -1,6 +1,5 @@
-// src/app/pages/login/login.ts
-
-import { Component } from '@angular/core';
+import { Component, Inject, PLATFORM_ID } from '@angular/core';
+import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 
@@ -11,35 +10,31 @@ import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-login',
   standalone: true,
-  // ESTA ES LA LÍNEA MÁS IMPORTANTE: LA "CAJA DE HERRAMIENTAS"
-  imports: [
-    CommonModule,  // <-- Habilita *ngIf, *ngFor, etc.
-    FormsModule    // <-- Habilita [(ngModel)] y formularios
-  ],
+  imports: [FormsModule],
   templateUrl: './login.html',
 })
 export class LoginComponent {
-  username = '';
-  password = '';
-  error = '';
+  username: string = '';
+  password: string = '';
+  API = 'http://localhost:8000';
+  //private readonly storage = inject(SaveStorageService)
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(private http: HttpClient, private router: Router, private storage: SafeStorageService) {}
 
+  
   login() {
-    const body = new URLSearchParams();
-    body.set('username', this.username);
-    body.set('password', this.password);
+  this.http.post<any>(`${this.API}/login`, {
+    username: this.username.trim(),
+    password: this.password.trim()
+  }).subscribe({
+    next: (res) => {
+        console.log("respuesta",res)
+        this.storage.setToken(res.access_token)
+        console.log("token guardado",this.storage.getToken())
+      this.router.navigateByUrl('/landing');  // navegar a landing
+    },
+    error: () => alert('Usuario o contraseña incorrectos')
+  });
+}
 
-    this.http.post<any>('http://localhost:8000/login', body.toString(), {
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-    }).subscribe({
-      next: (res) => {
-        localStorage.setItem('token', res.access_token);
-        this.router.navigateByUrl('/landing');
-      },
-      error: () => {
-        this.error = 'Usuario o contraseña incorrectos';
-      }
-    });
-  }
 }

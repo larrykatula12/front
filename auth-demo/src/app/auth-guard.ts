@@ -1,22 +1,42 @@
-// src/app/auth-guard.ts
+import { Injectable } from '@angular/core';
+import { CanActivate, Router, UrlTree } from '@angular/router';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { catchError, map, Observable, of } from 'rxjs';
+import { SafeStorageService } from './services/storage';
 
-import { inject } from '@angular/core';
-import { CanActivateFn, Router } from '@angular/router';
+@Injectable({ providedIn: 'root' })
 
-// La función del guardián de la ruta
-export const authGuard: CanActivateFn = () => {
-  const router = inject(Router);
+export class AuthGuard implements CanActivate {
+  private API = 'http://localhost:8000';
 
-  // Verificamos si existe un token en el localStorage
-  const token = localStorage.getItem('token');
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    private storage: SafeStorageService
+  ) {}
 
-  // Si no hay token...
-  if (!token) {
-    // Redirigimos al usuario a la página de login
-    router.navigateByUrl('/login');
-    return false; // No permitimos el acceso
+  canActivate(): boolean | UrlTree | Observable<boolean | UrlTree> {
+    console.log('[AuthGuard] ejecutado');
+    const token = this.storage.getToken();
+    console.log('[AuthGuard] token:', token);
+
+    if (!token) {
+      return this.router.parseUrl('/login');
+    }
+
+    // 👉 Configuramos headers con el token
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+    });
+
+    // Validamos el token contra tu endpoint
+    return this.http.get(`${this.API}/landing`, { headers }).pipe(
+      map(() => true),
+      catchError(() => {
+        console.log('[AuthGuard] token inválido');
+        this.storage.removeToken();
+        return of(this.router.parseUrl('/login'));
+      })
+    );
   }
-
-  // Si hay un token, permitimos el acceso a la ruta
-  return true;
-};
+}

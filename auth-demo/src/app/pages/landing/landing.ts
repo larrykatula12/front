@@ -1,9 +1,7 @@
 // src/app/pages/landing/landing.ts
 
 import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 @Component({
   selector: 'app-landing',
@@ -12,29 +10,11 @@ import { Router } from '@angular/router';
   templateUrl: './landing.html',
 })
 export class LandingComponent implements OnInit {
-  message: string = 'Cargando...';
+  message = '';
+  API = 'http://localhost:8000';
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(private http: HttpClient) {}
 
-  ngOnInit(): void {
-    // Hacemos una petición GET a la ruta protegida del backend
-    this.http.get<any>('http://localhost:8000/landing').subscribe({
-      next: (res) => {
-        // Si la petición es exitosa, mostramos el mensaje del backend
-        this.message = res.message;
-      },
-      error: (err) => {
-        // Si el token es inválido o expiró, el backend dará error.
-        // Limpiamos el token y lo mandamos al login.
-        console.error('Error de autenticación:', err);
-        this.logout();
-      },
-    });
-  }
-
-  logout() {
-    // Borramos el token y redirigimos al login
-    localStorage.removeItem('token');
-    this.router.navigateByUrl('/login');
+  ngOnInit() {
   }
 }
