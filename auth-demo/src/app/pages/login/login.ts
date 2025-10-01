@@ -1,17 +1,16 @@
 import { Component, Inject, PLATFORM_ID } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { Router } from '@angular/router';
-
-// Directivas para el HTML
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { isPlatformBrowser } from '@angular/common';
+import { SafeStorageService } from '../../services/storage';
 
 @Component({
   selector: 'app-login',
   standalone: true,
   imports: [FormsModule],
   templateUrl: './login.html',
+  styleUrls: ['./login.scss']
 })
 export class LoginComponent {
   username: string = '';

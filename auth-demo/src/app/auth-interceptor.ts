@@ -1,6 +1,9 @@
-// src/app/auth-interceptor.ts
-
+// auth.interceptor.ts (Angular 20, funcional)
 import { HttpInterceptorFn } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { SafeStorageService } from './services/storage';
+
+const SKIP_URLS = ['/auth/login', '/auth/refresh']; // opcional
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const storage = inject(SafeStorageService);

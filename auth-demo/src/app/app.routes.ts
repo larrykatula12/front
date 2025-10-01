@@ -1,5 +1,3 @@
-// src/app/app.routes.ts
-
 import { Routes } from '@angular/router';
 import { LoginComponent } from '../app/pages/login/login';
 import { LandingComponent } from '../app/pages/landing/landing';
