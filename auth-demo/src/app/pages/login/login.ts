@@ -1,11 +1,22 @@
+// src/app/pages/login/login.ts
+
 import { Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 
+// Directivas para el HTML
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+
 @Component({
   selector: 'app-login',
+  standalone: true,
+  // ESTA ES LA LÍNEA MÁS IMPORTANTE: LA "CAJA DE HERRAMIENTAS"
+  imports: [
+    CommonModule,  // <-- Habilita *ngIf, *ngFor, etc.
+    FormsModule    // <-- Habilita [(ngModel)] y formularios
+  ],
   templateUrl: './login.html',
-  styleUrls: ['./login.scss']
 })
 export class LoginComponent {
   username = '';

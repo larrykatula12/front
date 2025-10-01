@@ -1,8 +1,16 @@
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { AuthInterceptor } from './auth-interceptor';
+// src/app/app.config.ts
 
-export const appConfig = {
+import { ApplicationConfig } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { routes } from './app.routes';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+// 👇 **CORRIGE LA MAYÚSCULA AQUÍ**
+import { authInterceptor } from './auth-interceptor';
+
+export const appConfig: ApplicationConfig = {
   providers: [
-    provideHttpClient(withInterceptors([() => new AuthInterceptor()])),
-  ],
+    provideRouter(routes),
+    // 👇 **Y USA EL NOMBRE CORRECTO AQUÍ TAMBIÉN**
+    provideHttpClient(withInterceptors([authInterceptor]))
+  ]
 };
